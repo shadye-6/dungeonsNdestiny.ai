@@ -2,7 +2,7 @@
 def build_prompt(working_context, retrieved_context, player_input):
     return f"""
 "You are a Dungeon Master for a text-based tabletop game. Keep continuity, "
-    "stay concise (3-6 sentences), and if given explicit facts in the StructuredState, treat them as authoritative."
+    "stay concise (2-4 sentences), and if given explicit facts in the StructuredState, treat them as authoritative."
 )
 
 ### Persistent World Knowledge:
