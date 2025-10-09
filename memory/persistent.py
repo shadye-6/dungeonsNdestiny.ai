@@ -1,85 +1,82 @@
-# memory/persistent_memory.py
 import os
-import json
 import numpy as np
 import faiss
+from pymongo import MongoClient
 from memory.embeddings import embed_text
+from utils.config import MONGO_URI, MONGO_DB_NAME, MONGO_COLLECTION_NAME
+
+MAX_FAISS_ENTRIES = 100  # only index last 100 entries in FAISS
 
 class PersistentMemory:
-    def __init__(self, path="storage/world_state.json"):
-        """
-        PersistentMemory with FAISS, auto-detects embedding dimension on first add.
-        """
-        self.path = path
-        self.memory = []  # list of {"summary": ..., "embedding": ...}
-        self.ids = []     # FAISS index IDs
-        self._index = None  # FAISS index (will be initialized after first embedding)
-        self.dim = None     # will store embedding dimension
+    def __init__(self):
+        # MongoDB setup
+        self.client = MongoClient(MONGO_URI)
+        self.db = self.client[MONGO_DB_NAME]
+        self.collection = self.db[MONGO_COLLECTION_NAME]
 
-        # ensure storage folder exists
-        os.makedirs(os.path.dirname(self.path), exist_ok=True)
+        # In-memory FAISS index for fast retrieval
+        self._index = None
+        self.dim = None
+        self.memory_cache = []  # cache last N entries for FAISS
 
-        # load existing memory if available
-        self.load()
+        # Load latest N entries from MongoDB into FAISS
+        self._load_latest_faiss_entries()
 
-    def load(self):
-        """Load memory from JSON and rebuild FAISS index if data exists."""
-        try:
-            with open(self.path, "r") as f:
-                self.memory = json.load(f)
-            self.ids = list(range(len(self.memory)))
-            if self.memory:
-                # auto-detect dimension
-                self.dim = len(self.memory[0]["embedding"])
-                self._index = faiss.IndexFlatIP(self.dim)
-                vectors = np.array([m["embedding"] for m in self.memory], dtype="float32")
-                self._index.add(vectors)
-        except FileNotFoundError:
-            self.memory = []
-            self.ids = []
+    def _load_latest_faiss_entries(self):
+        # Retrieve last MAX_FAISS_ENTRIES sorted by insertion order
+        docs = list(
+            self.collection.find().sort("_id", -1).limit(MAX_FAISS_ENTRIES)
+        )
+        docs.reverse()  # so oldest is first
 
-    def save(self):
-        """Save memory to JSON file."""
-        with open(self.path, "w") as f:
-            json.dump(self.memory, f, indent=2)
+        self.memory_cache = docs
+
+        if docs:
+            self.dim = len(docs[0]["embedding"])
+            self._index = faiss.IndexFlatIP(self.dim)
+            vectors = np.array([d["embedding"] for d in docs], dtype="float32")
+            self._index.add(vectors)
 
     def add_memory(self, summary, embedding):
-        """Add a new memory entry (embedding auto-normalized)."""
+        """Add memory to MongoDB and FAISS."""
         embedding = np.array(embedding, dtype="float32")
-        # normalize for cosine similarity
         norm = np.linalg.norm(embedding)
         if norm > 0:
             embedding = embedding / norm
 
-        # Initialize FAISS index if first embedding
+        # Store in MongoDB
+        doc = {"summary": summary, "embedding": embedding.tolist()}
+        self.collection.insert_one(doc)
+
+        # Update FAISS index cache
         if self._index is None:
             self.dim = embedding.shape[0]
             self._index = faiss.IndexFlatIP(self.dim)
+            self.memory_cache = []
 
-        # Safety check
-        if embedding.shape[0] != self.dim:
-            raise ValueError(f"Embedding dimension {embedding.shape[0]} does not match FAISS index dimension {self.dim}")
+        # Maintain cache of last MAX_FAISS_ENTRIES
+        self.memory_cache.append(doc)
+        if len(self.memory_cache) > MAX_FAISS_ENTRIES:
+            self.memory_cache.pop(0)  # remove oldest
 
-        # store memory
-        self.memory.append({"summary": summary, "embedding": embedding.tolist()})
-        self.ids.append(len(self.memory) - 1)
-        self._index.add(np.array([embedding], dtype="float32"))
-
-        self.save()
+        # Rebuild FAISS index
+        vectors = np.array([d["embedding"] for d in self.memory_cache], dtype="float32")
+        self._index.reset()
+        self._index.add(vectors)
 
     def retrieve(self, query, top_k=3):
-        """Retrieve top-k most similar memories."""
+        """Retrieve top-k similar summaries using FAISS on latest entries."""
+        if self._index is None or len(self.memory_cache) == 0:
+            return []
+
         query_emb = np.array(embed_text(query), dtype="float32")
         norm = np.linalg.norm(query_emb)
         if norm > 0:
             query_emb = query_emb / norm
 
-        if self._index is None or len(self.memory) == 0:
-            return []
-
         distances, indices = self._index.search(np.array([query_emb], dtype="float32"), top_k)
         results = []
         for idx in indices[0]:
-            if idx < len(self.memory):
-                results.append(self.memory[idx]["summary"])
+            if idx < len(self.memory_cache):
+                results.append(self.memory_cache[idx]["summary"])
         return results

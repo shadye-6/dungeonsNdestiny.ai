@@ -6,10 +6,11 @@ from memory.summarizer import summarize_for_memory
 from memory.embeddings import embed_text
 from llm.story_engine import generate_response
 from llm.prompt_builder import build_prompt
+from memory.persistent import PersistentMemory
 
 # Initialize memories
 working_mem = WorkingMemory(limit=5)
-persistent_mem = PersistentMemory(path="storage/world_state.json")
+persistent_mem = PersistentMemory()
 
 print("🛡️  AI Dungeon Master is ready! Type 'exit' to quit.")
 

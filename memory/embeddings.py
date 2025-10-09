@@ -1,29 +1,19 @@
 # memory/embeddings.py
-import google.generativeai as genai
-from utils.config import GEMINI_API_KEY
+import os
 
-genai.configure(api_key=GEMINI_API_KEY)
+BACKEND = os.getenv("EMBEDDING_BACKEND", "sentence")
 
-def embed_text(text: str) -> list[float]:
-    """
-    Generate embedding vector for a given text using Gemini Embeddings API.
-    Returns a list of floats.
-    """
-    response = genai.embeddings.create(
-        model="embed-text-3-large",
-        input=text
-    )
-    # The vector is in response.data[0].embedding
-    return response.data[0].embedding
+if BACKEND == "gemini":
+    import google.generativeai as genai
+    from utils.config import GEMINI_API_KEY
+    genai.configure(api_key=GEMINI_API_KEY)
 
-# memory/embeddings.py
-from sentence_transformers import SentenceTransformer
+    def embed_text(text: str) -> list[float]:
+        response = genai.embeddings.create(model="embed-text-3-large", input=text)
+        return response.data[0].embedding
+else:
+    from sentence_transformers import SentenceTransformer
+    model = SentenceTransformer("all-MiniLM-L6-v2")
 
-# load model once
-model = SentenceTransformer('all-MiniLM-L6-v2')
-
-def embed_text(text: str) -> list[float]:
-    """
-    Generate embedding vector for a given text using Sentence Transformers.
-    """
-    return model.encode(text).tolist()
+    def embed_text(text: str) -> list[float]:
+        return model.encode(text).tolist()

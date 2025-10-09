@@ -16,3 +16,10 @@ MEMORY_INDEX_PATH = "storage/memory_index.pkl"
 
 # --- Logging ---
 LOG_LEVEL = "INFO"
+
+# utils/config.py
+
+MONGO_URI = "mongodb+srv://shadye:QcI9sBf7YotyPV3O@textembeddings.lxxktdc.mongodb.net/?retryWrites=true&w=majority&appName=TextEmbeddings"
+MONGO_DB_NAME = "dungeon_master"
+MONGO_COLLECTION_NAME = "memories"
+
