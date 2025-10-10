@@ -1,4 +1,3 @@
-# memory/npc_and_quest_parser.py
 import json
 import re
 
@@ -24,12 +23,11 @@ def parse_llm_output(llm_text: str):
         quests = []
 
         for q in quests_raw:
-            # canonical keys with defaults
             quest_name = q.get("quest_name", "Unnamed Quest")
             progress = q.get("progress", "Started")
             description = q.get("description", "")
             reward = q.get("reward", "unknown reward")
-            mandatory = bool(q.get("mandatory", False))  # optional by default
+            mandatory = bool(q.get("mandatory", False))  
 
             # Include quest if it's mandatory or has meaningful progress
             if mandatory or progress.lower() in ["started", "in progress", "completed"]:

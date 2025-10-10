@@ -1,4 +1,3 @@
-# interface/cli.py
 COLOR_PLAYER = "\033[96m"   # Cyan
 COLOR_DM = "\033[92m"       # Bright Green
 COLOR_RESET = "\033[0m" 

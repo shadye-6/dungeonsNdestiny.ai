@@ -9,7 +9,6 @@ from memory.embeddings import embed_text
 from llm.story_engine import generate_response
 from llm.prompt_builder import build_prompt
 
-# Initialize systems
 persistent_mem = PersistentMemory()
 character_mem = CharacterMemory()
 quest_log = QuestLog()
@@ -42,7 +41,7 @@ while True:
     # Persistent memory for storyline and plot progression
     retrieved_context = "\n".join(persistent_mem.retrieve(player_input, top_k=100))
 
-    # Include NPC-specific history
+    # Include NPC history
     if npc_name:
         npc_history = "\n".join(character_mem.get_memory(npc_name))
         if npc_history:

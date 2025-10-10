@@ -1,4 +1,3 @@
-# memory/character_memory.py
 import faiss
 import numpy as np
 from memory.embeddings import embed_text
@@ -40,7 +39,7 @@ class CharacterMemory:
 
         # Build FAISS index
         dim = embeddings.shape[1]
-        index = faiss.IndexFlatIP(dim)  # inner product (cosine if normalized)
+        index = faiss.IndexFlatIP(dim)  
         index.add(embeddings)
 
         query_emb = np.array([embed_text(query)], dtype="float32")

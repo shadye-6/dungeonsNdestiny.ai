@@ -1,4 +1,3 @@
-# llm/interaction_analyzer.py
 import json
 import re
 import google.generativeai as genai
@@ -47,7 +46,7 @@ DM Response: {dm_response}
         response = model.generate_content(prompt)
         text = response.text.strip()
 
-        # Extract JSON safely
+        # Extract JSON 
         json_match = re.search(r"\{.*\}", text, re.DOTALL)
         if not json_match:
             raise ValueError("No JSON object found in response.")
@@ -58,7 +57,6 @@ DM Response: {dm_response}
         if "quests" not in data:
             data["quests"] = []
         else:
-            # Map event_type/progress_status -> canonical "progress" string
             status_map = {
                 "started": "Started",
                 "updated": "In Progress",

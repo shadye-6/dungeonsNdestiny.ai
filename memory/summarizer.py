@@ -1,4 +1,3 @@
-# memory/summarizer.py
 from llm.story_engine import generate_response
 
 def summarize_for_memory(text: str) -> str:
@@ -15,6 +14,5 @@ Text:
 Summary:
 """
     summary = generate_response(prompt)
-    # Optional: clean text
     summary = summary.strip().replace("\n", " ")
     return summary

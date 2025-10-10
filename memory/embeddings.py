@@ -1,4 +1,3 @@
-# memory/embeddings.py
 import os
 
 BACKEND = os.getenv("EMBEDDING_BACKEND", "sentence")

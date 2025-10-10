@@ -1,4 +1,3 @@
-# utils/logger.py
 import logging
 from utils.config import LOG_LEVEL
 
@@ -15,7 +14,3 @@ def setup_logger(name="AI_DungeonMaster"):
 
     return logger
 
-# Example usage:
-# from utils.logger import setup_logger
-# logger = setup_logger()
-# logger.info("Memory retrieved successfully.")

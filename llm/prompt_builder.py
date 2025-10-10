@@ -1,5 +1,3 @@
-# prompt_builder.py
-
 def build_prompt(working_context, retrieved_context, player_input, reward_context=""):
     """
     Builds a prompt for the Dungeon Master LLM that includes:
