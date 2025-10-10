@@ -14,7 +14,16 @@ persistent_mem = PersistentMemory()
 character_mem = CharacterMemory()
 quest_log = QuestLog()
 
-print("🛡️ AI Dungeon Master is ready! Type 'exit' to quit.")
+print("🛡️ AI Dungeon Master is ready! Type 'start' to continue or 'exit' to quit.\n")
+
+print("📜 General Rules:")
+print("- Each turn, you (the player) provide input to interact with the world.")
+print("- You may talk to NPCs, explore locations, solve puzzles, or accept quests.")
+print("- Optional side quests can be accepted or declined; main storyline quests must be completed.")
+print("- Your progress in quests, items obtained, and key choices affect the main storyline.")
+print("- You can type 'abandon quest' to give up on optional quests (no rewards).")
+print("- Have fun and immerse yourself in the world of 'The Shattered Crown'!\n")
+
 
 while True:
     player_input = get_player_input()

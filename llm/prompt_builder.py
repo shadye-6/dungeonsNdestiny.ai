@@ -23,15 +23,15 @@ The players must recover the fragments of the Crown, restore balance to Eryndor,
 Key Plot Threads:
 - The Crown Fragments: Each piece has a guardian and unique magical properties. Decisions about which fragment to pursue first, who to trust with it, or whether to use its powers shape future events.
 - Factions & Alliances: Nobles, rebel leaders, secret cults, and mystical beings react dynamically to player decisions. Early betrayals have ripple effects.
-- The Vanished King: Clues about King Alaric’s fate appear gradually. Player investigation or neglect alters outcomes.
+- The Vanished King: Clues about King Alaric's fate appear gradually. Player investigation or neglect alters outcomes.
 - Evolving World Events: Towns may fall under siege, forests may be corrupted, or distant lands may prosper depending on player actions.
-- Moral Dilemmas: Choosing between personal gain, loyalty, and the kingdom’s welfare creates lasting consequences.
+- Moral Dilemmas: Choosing between personal gain, loyalty, and the kingdom's welfare creates lasting consequences.
 
 Potential Story Arcs:
-1. Gathering Allies – Form alliances and quest for the first Crown fragment.
-2. The Dark Rising – Shards influence the world; monsters, curses, and faction conflicts escalate.
-3. Secrets Revealed – Hidden truths about King Alaric, the Crown, and a shadowy enemy emerge.
-4. The Final Confrontation – Choices made in prior arcs determine endings.
+1. Gathering Allies - Form alliances and quest for the first Crown fragment.
+2. The Dark Rising - Shards influence the world; monsters, curses, and faction conflicts escalate.
+3. Secrets Revealed - Hidden truths about King Alaric, the Crown, and a shadowy enemy emerge.
+4. The Final Confrontation - Choices made in prior arcs determine endings.
 """
 
     return f"""
@@ -45,8 +45,8 @@ You are a Dungeon Master for a text-based tabletop RPG. Follow these rules:
 - Introduce at least one NPC interaction per turn if possible.
 - Player may give unrelated or unusual input; respond politely and keep narrative flowing.
 - After narrative, output a JSON object with:
-    1️⃣ NPC interactions: npc_name, interaction, context
-    2️⃣ Quests: quest_name, progress (Started/In Progress/Completed), description, reward, mandatory (True for main story, False for optional)
+    1. NPC interactions: npc_name, interaction, context
+    2. Quests: quest_name, progress (Started/In Progress/Completed), description, reward, mandatory (True for main story, False for optional)
 
 ### Persistent World Knowledge:
 {retrieved_context}
