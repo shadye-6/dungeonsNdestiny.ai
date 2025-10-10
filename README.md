@@ -1,4 +1,4 @@
-# AI Dungeon Master
+# 🔮 Dungeons N Destiny 
 
 An AI-driven Dungeon Master that delivers **persistent, interactive storytelling** with both short-term and long-term memory, enabling consistent, evolving gameplay across sessions.
 
@@ -44,7 +44,7 @@ pip install google-generativeai sentence-transformers faiss-cpu pymongo numpy tq
 |-----------|-------------|
 | `MONGO_URI` | MongoDB connection string (`mongodb://localhost:27017`) |
 | `EMBEDDING_BACKEND` | `gemini` or `sentence` |
-| `GEMINI_API_KEY` | Required only for Gemini backend |
+| `GEMINI_API_KEY` | Required for Gemini backend |
 
 ---
 
@@ -109,7 +109,7 @@ Demo Recording: https://drive.google.com/your-demo-link
 | **Short-Term Recall** | `WorkingMemory` |
 | **Long-Term Recall** | `PersistentMemory` (Mongo + FAISS) |
 | **Architecture & Code** | Modular, documented, reproducible |
-| **Presentation & Report** | This README + `report.pdf` |
+| **Presentation & Report** | README + `report.pdf` |
 | **Bonus** | NPC & Quest memory modules |
 
 ---
