@@ -13,7 +13,7 @@ MEMORY_INDEX_PATH = "storage/memory_index.pkl"
 
 LOG_LEVEL = "INFO"
 
-MONGO_URI = "mongodb+srv://shadye:QcI9sBf7YotyPV3O@textembeddings.lxxktdc.mongodb.net/?retryWrites=true&w=majority&appName=TextEmbeddings"
+MONGO_URI = "mongodb+srv://shadye:<password>@textembeddings.lxxktdc.mongodb.net/?retryWrites=true&w=majority&appName=TextEmbeddings"
 MONGO_DB_NAME = "dungeon_master"
 MONGO_COLLECTION_NAME = "memories"
 
