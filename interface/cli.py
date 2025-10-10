@@ -1,13 +1,16 @@
 # interface/cli.py
+COLOR_PLAYER = "\033[94m"   # Blue
+COLOR_DM = "\033[92m"       # Green
+COLOR_RESET = "\033[0m"     # Reset to default
 
 def get_player_input() -> str:
     """
     Prompt the player for input.
     """
-    return input("\n> Player: ")
+    return input(f"{COLOR_PLAYER}> Player: {COLOR_RESET}")
 
 def display_output(text: str):
     """
     Display the DM's response.
     """
-    print(f"\nDM: {text}\n")
+    print(f"{COLOR_DM}{text}{COLOR_RESET}")

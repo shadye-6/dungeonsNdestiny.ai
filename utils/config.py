@@ -14,6 +14,7 @@ TOP_K_RETRIEVAL = 3           # number of relevant memories to retrieve
 WORLD_STATE_PATH = "storage/world_state.json"
 MEMORY_INDEX_PATH = "storage/memory_index.pkl"
 
+
 # --- Logging ---
 LOG_LEVEL = "INFO"
 
@@ -22,4 +23,10 @@ LOG_LEVEL = "INFO"
 MONGO_URI = "mongodb+srv://shadye:QcI9sBf7YotyPV3O@textembeddings.lxxktdc.mongodb.net/?retryWrites=true&w=majority&appName=TextEmbeddings"
 MONGO_DB_NAME = "dungeon_master"
 MONGO_COLLECTION_NAME = "memories"
+
+# Collections
+MEMORY_COLLECTION = "memories"
+CHARACTER_COLLECTION = "characters"
+QUEST_COLLECTION = "quests"
+REWARD_COLLECTION = "rewards"
 
