@@ -8,15 +8,16 @@ class QuestLog:
         self.collection = db[QUEST_COLLECTION]
         self.rewards = db[REWARD_COLLECTION]
 
-    def get_active_quest(self):
-        """Return the active quest (progress_status < 10 and not abandoned)."""
-        return self.collection.find_one({"active": True, "completed": False, "abandoned": False})
+    def get_active_quests(self):
+        """Return all active quests."""
+        return list(self.collection.find({"active": True, "completed": False, "abandoned": False}))
 
-    def add_quest(self, quest_name, summary, reward):
-        """Add a new quest only if no active quest exists."""
-        if self.get_active_quest():
-            return None  # Cannot accept a new quest while one is active
+    def get_active_quest_by_name(self, quest_name):
+        """Return a specific active quest by name."""
+        return self.collection.find_one({"quest_name": quest_name, "active": True, "completed": False, "abandoned": False})
 
+    def add_quest(self, quest_name, summary, reward, mandatory=False):
+        """Add a new quest."""
         quest_data = {
             "quest_name": quest_name,
             "summary": summary,
@@ -26,13 +27,14 @@ class QuestLog:
             "active": True,
             "completed": False,
             "reward_collected": False,
-            "abandoned": False
+            "abandoned": False,
+            "mandatory": mandatory          # True = main story, False = optional
         }
         self.collection.insert_one(quest_data)
         return quest_data
 
-    def update_progress(self, increment=1, new_summary=None):
-        quest = self.get_active_quest()
+    def update_progress(self, quest_name, increment=1, new_summary=None):
+        quest = self.get_active_quest_by_name(quest_name)
         if not quest:
             return None
 
@@ -48,13 +50,10 @@ class QuestLog:
         else:
             self.collection.update_one({"_id": quest["_id"]}, updates)
 
-    def abandon_quest(self):
-        """Mark the active quest as abandoned permanently."""
-        quest = self.get_active_quest()
-        if not quest:
-            return
-        self.collection.update_one(
-            {"_id": quest["_id"]},
+    def abandon_all_quests(self):
+        """Abandon all active quests."""
+        self.collection.update_many(
+            {"active": True, "completed": False},
             {"$set": {"active": False, "abandoned": True}}
         )
 

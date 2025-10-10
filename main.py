@@ -39,21 +39,21 @@ while True:
         if npc_history:
             retrieved_context += f"\nPrevious {npc_name} Interactions:\n{npc_history}"
 
-    # Quest context (only one active quest)
-    active_quest = quest_log.get_active_quest()
+    # Quest context (all active quests)
+    active_quests = quest_log.get_active_quests()
     quest_context = ""
-    if active_quest:
-        quest_context = (
-            f"- {active_quest['quest_name']} (Progress: {active_quest['progress_status']}/10)\n"
-            f"Summary: {active_quest.get('summary', '')}"
-        )
+    if active_quests:
+        quest_context = "\n".join([
+            f"- {q['quest_name']} (Progress: {q['progress_status']}/10)\nSummary: {q.get('progress_summary', '')}"
+            for q in active_quests
+        ])
 
     # Rewards context
     reward_context = quest_log.get_rewards_context()
 
     # Build LLM prompt
     prompt = build_prompt(
-        working_context + f"\nActive Quest:\n{quest_context}",
+        working_context + f"\nActive Quests:\n{quest_context}",
         retrieved_context,
         player_input,
         reward_context=reward_context
@@ -74,22 +74,50 @@ while True:
         character_mem.add_interaction(npc["npc_name"], npc["context"])
 
     # Handle quests
-
     for quest in quests:
-        # Accept new quest only if no active quest exists
-        if quest_log.get_active_quest() is None and quest["progress"].lower() == "started":
-            quest_log.add_quest(
-                quest_name=quest["quest_name"],
-                summary=quest["description"],
-                reward=quest.get("reward", "unknown reward")  # <-- fixed keyword
-            )
-            display_output(f"🗺️ New Quest Accepted: {quest['quest_name']}")
+        quest_name = quest["quest_name"]
+        is_mandatory = quest.get("mandatory", False)
 
-        # Update current quest progress
-        elif quest_log.get_active_quest() is not None:
-            quest_log.update_progress(increment=1, new_summary=quest["description"])
-            display_output(f"📜 Quest Progress Updated: {quest['quest_name']}")
+        # --- Mandatory Main Storyline Quests ---
+        if is_mandatory:
+            if quest_log.get_active_quest_by_name(quest_name) is None:
+                quest_log.add_quest(
+                    quest_name=quest_name,
+                    summary=quest["description"],
+                    reward=quest.get("reward", "unknown reward"),
+                    mandatory=True
+                )
+                display_output(f"📜 Main Quest Added: {quest_name}")
+            else:
+                quest_log.update_progress(
+                    quest_name,
+                    increment=1,
+                    new_summary=quest["description"]
+                )
+                display_output(f"📜 Main Quest Progress Updated: {quest_name}")
 
+        # --- Optional Side Quests ---
+        else:
+            if quest_log.get_active_quest_by_name(quest_name) is None:
+                display_output(f"🗺️ Optional Quest Available: {quest_name}\nDescription: {quest['description']}")
+                player_choice = get_player_input("Do you want to accept this quest? (yes/no) ").lower()
+                if player_choice in ["yes", "y"]:
+                    quest_log.add_quest(
+                        quest_name=quest_name,
+                        summary=quest["description"],
+                        reward=quest.get("reward", "unknown reward"),
+                        mandatory=False
+                    )
+                    display_output(f"✅ Optional Quest Accepted: {quest_name}")
+                else:
+                    display_output(f"❌ Optional Quest Declined: {quest_name}")
+            else:
+                quest_log.update_progress(
+                    quest_name,
+                    increment=1,
+                    new_summary=quest["description"]
+                )
+                display_output(f"📜 Optional Quest Progress Updated: {quest_name}")
 
     # Abandon quest mid-way
     if "abandon quest" in player_input.lower():
