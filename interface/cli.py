@@ -1,7 +1,7 @@
 # interface/cli.py
-COLOR_PLAYER = "\033[94m"   # Blue
-COLOR_DM = "\033[92m"       # Green
-COLOR_RESET = "\033[0m"     # Reset to default
+COLOR_PLAYER = "\033[96m"   # Cyan
+COLOR_DM = "\033[92m"       # Bright Green
+COLOR_RESET = "\033[0m" 
 
 def get_player_input() -> str:
     """

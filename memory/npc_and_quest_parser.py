@@ -11,29 +11,27 @@ def parse_llm_output(llm_text: str):
 
     Quests are treated as optional unless explicitly marked mandatory.
     """
-    # Find JSON object at the end
+    # Extract JSON object at the end of the text
     json_match = re.search(r'\{.*\}\s*$', llm_text, flags=re.DOTALL)
     if not json_match:
         return llm_text.strip(), [], []
 
-    json_text = json_match.group()
     dm_text = llm_text[:json_match.start()].strip()
-
     try:
-        data = json.loads(json_text)
+        data = json.loads(json_match.group())
         npcs = data.get("npcs", [])
         quests_raw = data.get("quests", [])
         quests = []
 
         for q in quests_raw:
-            # Ensure keys exist
+            # canonical keys with defaults
             quest_name = q.get("quest_name", "Unnamed Quest")
             progress = q.get("progress", "Started")
             description = q.get("description", "")
             reward = q.get("reward", "unknown reward")
-            mandatory = q.get("mandatory", False)  # optional unless specified
+            mandatory = bool(q.get("mandatory", False))  # optional by default
 
-            # Only include quest if mandatory or marked by LLM
+            # Include quest if it's mandatory or has meaningful progress
             if mandatory or progress.lower() in ["started", "in progress", "completed"]:
                 quests.append({
                     "quest_name": quest_name,

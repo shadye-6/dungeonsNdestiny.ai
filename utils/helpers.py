@@ -1,4 +1,3 @@
-# utils/helpers.py
 import numpy as np
 
 def cosine_similarity(vec1, vec2):

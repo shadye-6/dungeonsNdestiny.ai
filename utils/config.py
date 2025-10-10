@@ -1,12 +1,14 @@
-# utils/config.py
-
 import os
+from dotenv import load_dotenv
 
-# --- Gemini API ---
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyB3iUURQxuOVnyDIKTPnLn0KR5kPdcGLKs")
+# Load environment variables from .env
+load_dotenv()
+
+# Gemini API Key
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # --- Model Settings ---
-MODEL_NAME = "gemini-2.5-flash"
+MODEL_NAME = "gemini-2.5-flash-lite"
 MAX_TURNS_WORKING_MEMORY = 5  # short-term memory
 TOP_K_RETRIEVAL = 3           # number of relevant memories to retrieve
 

@@ -22,15 +22,15 @@ while True:
         print("Exiting AI Dungeon Master...")
         break
 
-    # Simple heuristic for NPC detection
+    # Detect NPC interaction
     npc_name = None
     if "talk to" in player_input.lower():
         npc_name = player_input.split("talk to")[-1].strip().title()
 
-    # 🧠 Retrieve working memory (last 5 summaries)
+    # Working memory: last 5 summaries
     working_context = "\n".join(persistent_mem.get_recent_memories(5))
 
-    # 🗃️ Retrieve persistent memory for long-term context (last 100 for FAISS)
+    # Persistent memory for storyline and plot progression
     retrieved_context = "\n".join(persistent_mem.retrieve(player_input, top_k=100))
 
     # Include NPC-specific history
@@ -39,7 +39,7 @@ while True:
         if npc_history:
             retrieved_context += f"\nPrevious {npc_name} Interactions:\n{npc_history}"
 
-    # Quest context (all active quests)
+    # Quest context
     active_quests = quest_log.get_active_quests()
     quest_context = ""
     if active_quests:
@@ -98,6 +98,7 @@ while True:
 
         # --- Optional Side Quests ---
         else:
+            # Only offer to accept if not already active
             if quest_log.get_active_quest_by_name(quest_name) is None:
                 display_output(f"🗺️ Optional Quest Available: {quest_name}\nDescription: {quest['description']}")
                 player_choice = get_player_input("Do you want to accept this quest? (yes/no) ").lower()
@@ -119,7 +120,7 @@ while True:
                 )
                 display_output(f"📜 Optional Quest Progress Updated: {quest_name}")
 
-    # Abandon quest mid-way
+    # Abandon quests mid-way
     if "abandon quest" in player_input.lower():
-        quest_log.abandon_quest()
-        display_output("🛑 Quest abandoned. No rewards received.")
+        quest_log.abandon_all_quests()
+        display_output("🛑 All active quests abandoned. No rewards received.")

@@ -3,7 +3,7 @@ from utils.config import GEMINI_API_KEY
 
 genai.configure(api_key=GEMINI_API_KEY)
 
-def generate_response(prompt, model="gemini-2.5-flash"):
+def generate_response(prompt, model="gemini-2.5-flash-lite"):
     model = genai.GenerativeModel(model)
     response = model.generate_content(prompt)
     return response.text
