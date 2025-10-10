@@ -1,4 +1,3 @@
-# main.py
 from interface.cli import get_player_input, display_output
 from memory.persistent import PersistentMemory
 from memory.character_memory import CharacterMemory
