@@ -8,7 +8,7 @@ An AI-driven Dungeon Master that delivers **persistent, interactive storytelling
 
 This project implements an **AI Dungeon Master** capable of:
 - Remembering past events, player choices, and characters.
-- Maintaining narrative consistency across ~30 turns.
+- Maintaining narrative consistency across ~100 turns. (can be scaled to 500).
 - Managing evolving quests and NPC interactions.
 - Using a hybrid memory architecture with both short-term and persistent recall.
 
@@ -19,7 +19,7 @@ This project implements an **AI Dungeon Master** capable of:
 | Component | Description |
 |------------|-------------|
 | **Working Memory** | Short-term (≈5 turns) memory for immediate context using a deque. |
-| **Persistent Memory** | Long-term (≈30 turns) semantic recall using FAISS (vector similarity) + MongoDB storage. |
+| **Persistent Memory** | Long-term (≈100 turns) semantic recall using FAISS (vector similarity) + MongoDB storage. |
 | **LLM Engine** | Uses Gemini API (or sentence-transformers locally) for narrative generation and embeddings. |
 | **Summarizer** | Compresses DM responses before saving to long-term memory. |
 | **Quest & NPC Modules** | Structured JSON extraction and persistence for NPCs, quests, and rewards. |
@@ -52,7 +52,7 @@ pip install google-generativeai sentence-transformers faiss-cpu pymongo numpy tq
 
 ```bash
 # 1. Clone repo
-git clone <your-repo-url>
+git clone https://github.com/shadye-6/dungeonsNdestiny.ai
 cd dungeonmaster.ai-main
 
 # 2. Create and activate virtual environment
@@ -97,14 +97,9 @@ python main.py
 ---
 
 ## 📽️ Demo Recording
-
-Include the demonstration video link here once recorded:
-
 ```
 Demo Recording: https://drive.google.com/your-demo-link
 ```
-
----
 
 ## 📊 Evaluation Mapping
 
