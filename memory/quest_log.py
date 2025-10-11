@@ -34,21 +34,34 @@ class QuestLog:
         return quest_data
 
     def update_progress(self, quest_name, increment=1, new_summary=None):
-        quest = self.get_active_quest_by_name(quest_name)
+        quest = self.collection.find_one({
+            "quest_name": quest_name,
+            "abandoned": False
+        })
         if not quest:
             return None
 
-        new_status = min(10, quest["progress_status"] + increment)
-        updates = {"$set": {"progress_status": new_status}}
-        if new_summary:
-            updates["$set"]["progress_summary"] = new_summary
+        new_status = min(10, quest.get("progress_status", 1) + increment)
+        updates = {
+            "$set": {
+                "progress_status": new_status,
+                "progress_summary": new_summary or quest.get("progress_summary", "")
+            }
+        }
 
         if new_status >= 10:
-            updates["$set"].update({"completed": True, "active": False})
-            self.collection.update_one({"_id": quest["_id"]}, updates)
-            self._issue_reward(quest)
-        else:
-            self.collection.update_one({"_id": quest["_id"]}, updates)
+            updates["$set"].update({
+                "completed": True,
+                "active": False
+            })
+        self.collection.update_one({"_id": quest["_id"]}, updates)
+        updated_quest = self.collection.find_one({"_id": quest["_id"]})
+
+        if updated_quest["completed"] and not updated_quest.get("reward_collected", False):
+            self._issue_reward(updated_quest)
+
+        return updated_quest
+
 
     def abandon_all_quests(self):
         """Abandon all active quests."""
