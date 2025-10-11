@@ -1,7 +1,6 @@
 import os
-import streamlit as st
 
-BACKEND = st.secrets.get("EMBEDDING_BACKEND", "sentence")
+BACKEND = os.getenv("EMBEDDING_BACKEND", "sentence")
 
 if BACKEND == "gemini":
     import google.generativeai as genai

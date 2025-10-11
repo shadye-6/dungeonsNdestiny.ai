@@ -2,10 +2,10 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-GEMINI_API_KEY= "AIzaSyB3iUURQxuOVnyDIKTPnLn0KR5kPdcGLKs"
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 MONGO_URI_PASSWORD = os.getenv("MONGODB_PASSWORD")
 
-MODEL_NAME = "gemini-2.5-flash-lite"
+MODEL_NAME = "gemini-2.5-flash"
 MAX_TURNS_WORKING_MEMORY = 5  # short-term memory
 TOP_K_RETRIEVAL = 3           # number of relevant memories to retrieve
 
@@ -14,7 +14,7 @@ MEMORY_INDEX_PATH = "storage/memory_index.pkl"
 
 LOG_LEVEL = "INFO"
 
-MONGO_URI = f"mongodb+srv://shadye:QcI9sBf7YotyPV3O@textembeddings.lxxktdc.mongodb.net/?retryWrites=true&w=majority&appName=TextEmbeddings"
+MONGO_URI = f"mongodb+srv://shadye:{MONGO_URI_PASSWORD}@textembeddings.lxxktdc.mongodb.net/?retryWrites=true&w=majority&appName=TextEmbeddings"
 
 MONGO_DB_NAME = "dungeon_master"
 MONGO_COLLECTION_NAME = "memories"
