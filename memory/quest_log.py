@@ -17,7 +17,7 @@ class QuestLog:
         return self.collection.find_one({"quest_name": quest_name, "active": True, "completed": False, "abandoned": False})
 
     def add_quest(self, quest_name, summary, reward, mandatory=False):
-        """Add a new quest."""
+        """Add a new quest and return the inserted document id."""
         quest_data = {
             "quest_name": quest_name,
             "summary": summary,
@@ -30,7 +30,11 @@ class QuestLog:
             "abandoned": False,
             "mandatory": mandatory          # True = main story, False = optional
         }
-        self.collection.insert_one(quest_data)
+        result = self.collection.insert_one(quest_data)
+        inserted_id = result.inserted_id
+        print(f"✅ Quest added to DB: '{quest_name}' (id: {inserted_id})")
+        # Optionally return full quest data + id
+        quest_data["_id"] = inserted_id
         return quest_data
 
     def update_progress(self, quest_name, increment=1, new_summary=None):

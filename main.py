@@ -42,7 +42,7 @@ while True:
 
     # Include NPC history
     if npc_name:
-        npc_history = "\n".join(character_mem.get_memory(npc_name))
+        npc_history = "\n".join(character_mem.get_memory(npc_name, query=player_input, top_k=5))
         if npc_history:
             retrieved_context += f"\nPrevious {npc_name} Interactions:\n{npc_history}"
 
@@ -78,7 +78,13 @@ while True:
 
     # Update NPC memory
     for npc in npcs:
-        character_mem.add_interaction(npc["npc_name"], npc["context"])
+        npc_name = npc["npc_name"]
+        context = npc["context"]
+        if npc_name and context:
+            print(f"💬 Logging NPC interaction: {npc_name} -> {context[:60]}...")
+            character_mem.add_interaction(npc_name, context)
+        else:
+            print(f"⚠️ Skipped invalid NPC entry: {npc}")
 
     # Handle quests
     for quest in quests:
@@ -108,15 +114,29 @@ while True:
             # Only offer to accept if not already active
             if quest_log.get_active_quest_by_name(quest_name) is None:
                 display_output(f"🗺️ Optional Quest Available: {quest_name}\nDescription: {quest['description']}")
-                player_choice = get_player_input("Do you want to accept this quest? (yes/no) ").lower()
+                # Try to use the existing get_player_input if it supports a prompt;
+                # otherwise fall back to Python's input() which reliably shows a prompt.
+                try:
+                    # If get_player_input accepts an argument (some implementations do)
+                    player_choice = get_player_input("Do you want to accept this quest? (yes/no) ").strip().lower()
+                except TypeError:
+                    # Fallback: use input() so prompt is shown to the terminal
+                    player_choice = input("Do you want to accept this quest? (yes/no) ").strip().lower()
+                except Exception:
+                    # Last-resort fallback to ensure we don't crash
+                    player_choice = get_player_input().strip().lower()
+
+                # Normalize and act on choice
                 if player_choice in ["yes", "y"]:
-                    quest_log.add_quest(
+                    new_quest = quest_log.add_quest(
                         quest_name=quest_name,
                         summary=quest["description"],
                         reward=quest.get("reward", "unknown reward"),
                         mandatory=False
                     )
                     display_output(f"✅ Optional Quest Accepted: {quest_name}")
+                    # Extra verification log
+                    print(f"   -> DB id: {new_quest.get('_id')}")
                 else:
                     display_output(f"❌ Optional Quest Declined: {quest_name}")
             else:
