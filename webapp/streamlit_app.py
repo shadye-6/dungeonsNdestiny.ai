@@ -11,7 +11,7 @@ from memory.embeddings import embed_text
 from llm.story_engine import generate_response
 from llm.prompt_builder import build_prompt
 
-st.markdown('<style>' + open("web_app/assets/style.css").read() + '</style>', unsafe_allow_html=True)
+st.markdown('<style>' + open("webapp/assets/style.css").read() + '</style>', unsafe_allow_html=True)
 
 
 # Initialize persistent objects only once (avoid re-init per rerun)
