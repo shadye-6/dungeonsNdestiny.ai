@@ -5,7 +5,7 @@ from pymongo import MongoClient
 from memory.embeddings import embed_text
 from utils.config import MONGO_URI, MONGO_DB_NAME, MONGO_COLLECTION_NAME
 
-MAX_FAISS_ENTRIES = 100  # FAISS keeps last 100 entries
+MAX_FAISS_ENTRIES = 500  # FAISS keeps last 500 entries
 
 class PersistentMemory:
     def __init__(self):

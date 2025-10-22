@@ -18,7 +18,6 @@ MONGO_URI = f"mongodb+srv://shadye:{MONGO_URI_PASSWORD}@textembeddings.lxxktdc.m
 
 MONGO_DB_NAME = "dungeon_master"
 MONGO_COLLECTION_NAME = "memories"
-
 MEMORY_COLLECTION = "memories"
 CHARACTER_COLLECTION = "characters"
 QUEST_COLLECTION = "quests"

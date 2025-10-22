@@ -66,7 +66,7 @@ if submit and player_input:
 
     # Working memory: last 5 summaries
     working_context = "\n".join(persistent_mem.get_recent_memories(5))
-    retrieved_context = "\n".join(persistent_mem.retrieve(player_input, top_k=100))
+    retrieved_context = "\n".join(persistent_mem.retrieve(player_input, top_k=500))
 
     # Include NPC previous interactions
     if npc_name:

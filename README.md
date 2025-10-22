@@ -8,7 +8,7 @@ An AI-driven Dungeon Master that delivers **persistent, interactive storytelling
 
 This project implements an **AI Dungeon Master** capable of:
 - Remembering past events, player choices, and characters.
-- Maintaining narrative consistency across ~100 turns. (can be scaled to 500).
+- Maintaining narrative consistency across ~500 turns. (can be scaled to 1500).
 - Managing evolving quests and NPC interactions.
 - Using a hybrid memory architecture with both short-term and persistent recall.
 
@@ -19,7 +19,7 @@ This project implements an **AI Dungeon Master** capable of:
 | Component | Description |
 |------------|-------------|
 | **Working Memory** | Short-term (≈5 turns) memory for immediate context using a deque. |
-| **Persistent Memory** | Long-term (≈100 turns) semantic recall using FAISS (vector similarity) + MongoDB storage. |
+| **Persistent Memory** | Long-term (≈500 turns) semantic recall using FAISS (vector similarity) + MongoDB storage. |
 | **LLM Engine** | Uses Gemini API (or sentence-transformers locally) for narrative generation and embeddings. |
 | **Summarizer** | Compresses DM responses before saving to long-term memory. |
 | **Quest & NPC Modules** | Structured JSON extraction and persistence for NPCs, quests, and rewards. |
@@ -53,7 +53,7 @@ pip install google-generativeai sentence-transformers faiss-cpu pymongo numpy tq
 ```bash
 # 1. Clone repo
 git clone https://github.com/shadye-6/dungeonsNdestiny.ai
-cd dungeonmaster.ai-main
+cd dungeonsNdestiny.ai-main
 
 # 2. Create and activate virtual environment
 python -m venv venv
@@ -67,7 +67,7 @@ docker run -d -p 27017:27017 mongo:6.0
 
 # 5. Run
 export MONGO_URI="mongodb://localhost:27017"
-export EMBEDDING_BACKEND="sentence"
+export EMBEDDING_BACKEND="gemini"
 python main.py
 ```
 
@@ -100,17 +100,6 @@ python main.py
 ```
 Demo Recording: https://drive.google.com/file/d/1cK5EMd80leFlOht1cnNjoOcAEAxI1EdY/view?usp=drive_link
 ```
-
-## 📊 Evaluation Mapping
-
-| Criteria | Implementation |
-|-----------|----------------|
-| **Gameplay & Robustness** | Interactive narrative loop (`main.py`) |
-| **Short-Term Recall** | `WorkingMemory` |
-| **Long-Term Recall** | `PersistentMemory` (Mongo + FAISS) |
-| **Architecture & Code** | Modular, documented, reproducible |
-| **Presentation & Report** | README + `report.pdf` |
-| **Bonus** | NPC & Quest memory modules |
 
 ---
 

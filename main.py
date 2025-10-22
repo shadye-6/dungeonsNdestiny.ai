@@ -7,13 +7,18 @@ from memory.summarizer import summarize_for_memory
 from memory.embeddings import embed_text
 from llm.story_engine import generate_response
 from llm.prompt_builder import build_prompt
+from collections import deque
 
 persistent_mem = PersistentMemory()
 character_mem = CharacterMemory()
 quest_log = QuestLog()
 
-print("🛡️ AI Dungeon Master is ready! Type 'start' to continue or 'exit' to quit.\n")
+# --- Load recent memories from DB once and keep an in-memory queue ---
+RECENT_CACHE_SIZE = 500
+# get_recent_memories(n) should return a list of summary strings (same shape as used before)
+recent_cache = deque(persistent_mem.get_recent_memories(RECENT_CACHE_SIZE), maxlen=RECENT_CACHE_SIZE)
 
+print("🛡️ AI Dungeon Master is ready! Type 'start' to continue or 'exit' to quit.\n")
 print("📜 General Rules:")
 print("- Each turn, you (the player) provide input to interact with the world.")
 print("- You may talk to NPCs, explore locations, solve puzzles, or accept quests.")
@@ -34,11 +39,11 @@ while True:
     if "talk to" in player_input.lower():
         npc_name = player_input.split("talk to")[-1].strip().title()
 
-    # Working memory: last 5 summaries
-    working_context = "\n".join(persistent_mem.get_recent_memories(5))
+    # Working memory: last 5 summaries (use in-memory queue, avoid DB hit each turn)
+    working_context = "\n".join(list(recent_cache)[-5:])
 
     # Persistent memory for storyline and plot progression
-    retrieved_context = "\n".join(persistent_mem.retrieve(player_input, top_k=100))
+    retrieved_context = "\n".join(persistent_mem.retrieve(player_input, top_k=500))
 
     # Include NPC history
     if npc_name:
@@ -75,6 +80,9 @@ while True:
     summary = summarize_for_memory(dm_text)
     summary_emb = embed_text(summary)
     persistent_mem.add_memory(summary, summary_emb)
+
+    # update in-memory recent cache so future turns use it (no DB read)
+    recent_cache.append(summary)
 
     # Update NPC memory
     for npc in npcs:
@@ -114,19 +122,12 @@ while True:
             # Only offer to accept if not already active
             if quest_log.get_active_quest_by_name(quest_name) is None:
                 display_output(f"🗺️ Optional Quest Available: {quest_name}\nDescription: {quest['description']}")
-                # Try to use the existing get_player_input if it supports a prompt;
-                # otherwise fall back to Python's input() which reliably shows a prompt.
                 try:
-                    # If get_player_input accepts an argument (some implementations do)
                     player_choice = get_player_input("Do you want to accept this quest? (yes/no) ").strip().lower()
                 except TypeError:
-                    # Fallback: use input() so prompt is shown to the terminal
                     player_choice = input("Do you want to accept this quest? (yes/no) ").strip().lower()
                 except Exception:
-                    # Last-resort fallback to ensure we don't crash
                     player_choice = get_player_input().strip().lower()
-
-                # Normalize and act on choice
                 if player_choice in ["yes", "y"]:
                     new_quest = quest_log.add_quest(
                         quest_name=quest_name,
@@ -135,7 +136,6 @@ while True:
                         mandatory=False
                     )
                     display_output(f"✅ Optional Quest Accepted: {quest_name}")
-                    # Extra verification log
                     print(f"   -> DB id: {new_quest.get('_id')}")
                 else:
                     display_output(f"❌ Optional Quest Declined: {quest_name}")
