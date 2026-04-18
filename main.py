@@ -13,7 +13,7 @@ persistent_mem = PersistentMemory()
 character_mem = CharacterMemory()
 quest_log = QuestLog()
 
-# --- Load recent memories from DB once and keep an in-memory queue ---
+# --- Load recent memories from DB once and keep an in-memory queue 
 RECENT_CACHE_SIZE = 500
 # get_recent_memories(n) should return a list of summary strings (same shape as used before)
 recent_cache = deque(persistent_mem.get_recent_memories(RECENT_CACHE_SIZE), maxlen=RECENT_CACHE_SIZE)

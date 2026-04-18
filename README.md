@@ -105,4 +105,4 @@ Demo Recording: https://drive.google.com/file/d/1cK5EMd80leFlOht1cnNjoOcAEAxI1Ed
 
 ## 👥 Authors
 Developed by **Team kawAI**  
-Contributors: *[Pragadeesh SK, Dakshin]*
+Contributors: *[Pragadeesh S K, Dakshin]*
