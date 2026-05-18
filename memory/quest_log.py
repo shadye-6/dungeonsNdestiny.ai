@@ -35,10 +35,7 @@ class QuestLog:
             "mandatory": mandatory          # True = main story, False = optional
         }
         result = self.collection.insert_one(quest_data)
-        inserted_id = result.inserted_id
-        print(f"✅ Quest added to DB: '{quest_name}' (id: {inserted_id})")
-        # Optionally return full quest data + id
-        quest_data["_id"] = inserted_id
+        quest_data["_id"] = result.inserted_id
         return quest_data
 
     def update_progress(self, quest_name, increment=1, new_summary=None):

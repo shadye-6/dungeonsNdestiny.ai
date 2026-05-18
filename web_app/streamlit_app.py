@@ -6,6 +6,16 @@ load_dotenv()
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import streamlit as st
+
+# Push Streamlit secrets into os.environ BEFORE importing any project module.
+# config.py resolves GEMINI_API_KEY and MONGO_URI at module-load time from os.getenv,
+# and story_engine.py calls genai.configure() at import time, so env vars must be
+# present before those imports execute.
+if hasattr(st, "secrets"):
+    for _key in ("GEMINI_API_KEY", "MONGODB_PASSWORD", "EMBEDDING_BACKEND"):
+        if _key not in os.environ and _key in st.secrets:
+            os.environ[_key] = st.secrets[_key]
+
 from pymongo import MongoClient
 
 from memory.persistent import PersistentMemory
@@ -18,31 +28,7 @@ from memory.summarizer import summarize_for_memory
 from memory.embeddings import embed_text
 from llm.story_engine import generate_response
 from llm.prompt_builder import build_prompt
-from utils.config import MONGO_URI, MONGO_DB_NAME
-
-
-# ---- Secret resolution -------------------------------------------------
-def get_secret(key: str) -> str:
-    value = os.getenv(key)
-    if value is None and hasattr(st, "secrets"):
-        value = st.secrets.get(key)
-    if value is None:
-        raise ValueError(f"Secret '{key}' not found in environment or st.secrets")
-    os.environ[key] = value  # propagate to downstream modules
-    return value
-
-
-try:
-    get_secret("GEMINI_API_KEY")
-    get_secret("MONGODB_PASSWORD")
-except ValueError as e:
-    st.error(f"⚠️ Missing required secret: {e}. Set it in your .env file or Streamlit secrets.")
-    st.stop()
-
-try:
-    get_secret("EMBEDDING_BACKEND")
-except ValueError:
-    pass  # defaults to "sentence" via os.getenv fallback in embeddings.py
+from utils.config import MONGO_URI, MONGO_DB_NAME, SESSION_COLLECTION
 
 
 # ---- Cached resource init ----------------------------------------------
@@ -69,7 +55,7 @@ def get_world_state():
 @st.cache_resource
 def get_sessions_col():
     client = MongoClient(MONGO_URI)
-    return client[MONGO_DB_NAME]["sessions"]
+    return client[MONGO_DB_NAME][SESSION_COLLECTION]
 
 
 # ---- Session history persistence ---------------------------------------
@@ -88,6 +74,12 @@ def load_history() -> list:
 
 # ---- Streamlit page config ---------------------------------------------
 st.set_page_config(page_title="Dungeons N Destiny", layout="wide")
+
+# Validate required secrets after set_page_config so error messages render properly
+for _required in ("GEMINI_API_KEY", "MONGODB_PASSWORD"):
+    if not os.getenv(_required):
+        st.error(f"⚠️ Missing required secret: {_required}. Add it to your .env file or Streamlit Cloud secrets.")
+        st.stop()
 
 # Load CSS
 css_path = os.path.join(os.path.dirname(__file__), "assets", "styles.css")

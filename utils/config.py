@@ -10,8 +10,6 @@ MODEL_NAME = "gemini-2.5-flash"
 MAX_TURNS_WORKING_MEMORY = 5
 TOP_K_RETRIEVAL = 5
 
-LOG_LEVEL = "INFO"
-
 MONGO_URI = (
     f"mongodb+srv://shadye:{MONGO_URI_PASSWORD}"
     "@textembeddings.lxxktdc.mongodb.net/"
