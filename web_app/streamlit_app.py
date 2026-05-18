@@ -35,9 +35,14 @@ def get_secret(key: str) -> str:
 try:
     get_secret("GEMINI_API_KEY")
     get_secret("MONGODB_PASSWORD")
+except ValueError as e:
+    st.error(f"⚠️ Missing required secret: {e}. Set it in your .env file or Streamlit secrets.")
+    st.stop()
+
+try:
     get_secret("EMBEDDING_BACKEND")
 except ValueError:
-    pass  # allow missing EMBEDDING_BACKEND — defaults to "sentence"
+    pass  # defaults to "sentence" via os.getenv fallback in embeddings.py
 
 
 # ---- Cached resource init ----------------------------------------------
@@ -225,9 +230,12 @@ if submitted and player_input.strip():
     for quest in quests:
         quest_name = quest["quest_name"]
         is_mandatory = quest.get("mandatory", False)
+        active = ql.get_active_quest_by_name(quest_name)
 
-        if is_mandatory:
-            if ql.get_active_quest_by_name(quest_name) is None:
+        if active is not None:
+            ql.update_progress(quest_name, increment=1, new_summary=quest["description"])
+        elif not ql.quest_exists_by_name(quest_name):
+            if is_mandatory:
                 ql.add_quest(
                     quest_name=quest_name,
                     summary=quest["description"],
@@ -236,14 +244,10 @@ if submitted and player_input.strip():
                 )
                 st.session_state.history.append(f"*📜 Main quest added: {quest_name}*")
             else:
-                ql.update_progress(quest_name, increment=1, new_summary=quest["description"])
-        else:
-            if ql.get_active_quest_by_name(quest_name) is None:
                 already_pending = any(q["quest_name"] == quest_name for q in st.session_state.pending_quests)
                 if not already_pending:
                     st.session_state.pending_quests.append(quest)
-            else:
-                ql.update_progress(quest_name, increment=1, new_summary=quest["description"])
+        # else: quest already completed or abandoned — skip
 
     # Abandon quest via text
     if "abandon quest" in player_input.lower():

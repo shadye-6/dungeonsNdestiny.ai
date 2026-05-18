@@ -83,8 +83,6 @@ class CharacterMemory:
         }
         self.collection.insert_one(doc)
 
-        # print(f"💬 Logged NPC interaction: {npc_name} -> {interaction_text[:50]}...")
-
     def get_memory(self, npc_name: str, query: str = None, top_k: int = 5):
         """
         Retrieve up to `top_k` relevant memories for an NPC.

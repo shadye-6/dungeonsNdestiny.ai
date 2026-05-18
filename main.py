@@ -86,9 +86,16 @@ while True:
     for quest in quests:
         quest_name = quest["quest_name"]
         is_mandatory = quest.get("mandatory", False)
+        active = quest_log.get_active_quest_by_name(quest_name)
 
-        if is_mandatory:
-            if quest_log.get_active_quest_by_name(quest_name) is None:
+        if active is not None:
+            # Quest is currently in progress — advance it
+            quest_log.update_progress(quest_name, increment=1, new_summary=quest["description"])
+            if is_mandatory:
+                display_output(f"📜 Main Quest Progress Updated: {quest_name}")
+        elif not quest_log.quest_exists_by_name(quest_name):
+            # Quest is genuinely new — add it
+            if is_mandatory:
                 quest_log.add_quest(
                     quest_name=quest_name,
                     summary=quest["description"],
@@ -97,10 +104,6 @@ while True:
                 )
                 display_output(f"📜 Main Quest Added: {quest_name}")
             else:
-                quest_log.update_progress(quest_name, increment=1, new_summary=quest["description"])
-                display_output(f"📜 Main Quest Progress Updated: {quest_name}")
-        else:
-            if quest_log.get_active_quest_by_name(quest_name) is None:
                 display_output(f"\n🗺️ Optional Quest Available: {quest_name}\n   {quest['description']}")
                 player_choice = get_player_input("Accept this quest? (yes/no): ").strip().lower()
                 if player_choice in ["yes", "y"]:
@@ -113,8 +116,7 @@ while True:
                     display_output(f"✅ Quest Accepted: {quest_name}")
                 else:
                     display_output(f"❌ Quest Declined: {quest_name}")
-            else:
-                quest_log.update_progress(quest_name, increment=1, new_summary=quest["description"])
+        # else: quest was already completed or abandoned — ignore
 
     if "abandon quest" in player_input.lower():
         quest_log.abandon_all_quests()

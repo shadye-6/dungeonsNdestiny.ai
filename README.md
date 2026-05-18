@@ -1,108 +1,118 @@
-# 🔮 Dungeons N Destiny 
+# Dungeons N Destiny
 
-An AI-driven Dungeon Master that delivers **persistent, interactive storytelling** with both short-term and long-term memory, enabling consistent, evolving gameplay across sessions.
-
----
-
-## 🧭 Project Overview
-
-This project implements an **AI Dungeon Master** capable of:
-- Remembering past events, player choices, and characters.
-- Maintaining narrative consistency across ~500 turns. (can be scaled to 1500).
-- Managing evolving quests and NPC interactions.
-- Using a hybrid memory architecture with both short-term and persistent recall.
+An AI-driven Dungeon Master delivering **persistent, interactive storytelling** with a multi-tier memory architecture. The system maintains narrative coherence across hundreds of turns by combining short-term conversation context, long-term semantic recall, NPC character memory, world state tracking, and a dynamic quest log.
 
 ---
 
-## ⚙️ Architecture Summary
+## Architecture
 
-| Component | Description |
-|------------|-------------|
-| **Working Memory** | Short-term (≈5 turns) memory for immediate context using a deque. |
-| **Persistent Memory** | Long-term (≈500 turns) semantic recall using FAISS (vector similarity) + MongoDB storage. |
-| **LLM Engine** | Uses Gemini API (or sentence-transformers locally) for narrative generation and embeddings. |
-| **Summarizer** | Compresses DM responses before saving to long-term memory. |
-| **Quest & NPC Modules** | Structured JSON extraction and persistence for NPCs, quests, and rewards. |
+```
+Player Input
+     │
+     ▼
+┌─────────────────────────────────────────────────┐
+│              Prompt Builder                      │
+│  Working Memory  │  Persistent Memory (RAG)      │
+│  (last 5 turns)  │  (FAISS + MongoDB, top-5)     │
+│                  │  World State Context          │
+│                  │  Active Quests & Rewards      │
+└─────────────────────────────────────────────────┘
+     │
+     ▼
+   Gemini LLM  (gemini-2.5-flash)
+     │
+     ▼
+  Narrative + JSON {npcs, quests, world_events}
+     │
+     ├── Summarizer → PersistentMemory (MongoDB + FAISS)
+     │                WorkingMemory (in-memory deque)
+     │
+     ├── NPC Parser → CharacterMemory (per-NPC FAISS + MongoDB)
+     │
+     ├── Quest Parser → QuestLog (MongoDB)
+     │                  Rewards (MongoDB)
+     │
+     └── World Event Parser → WorldState (MongoDB)
+```
+
+| Module | Description |
+|---|---|
+| `memory/working.py` | Short-term deque — last 5 turn summaries for immediate context |
+| `memory/persistent.py` | Long-term semantic recall — FAISS over MongoDB-stored embeddings (up to 500 turns) |
+| `memory/character_memory.py` | Per-NPC FAISS index — NPCs remember past interactions and evolve accordingly |
+| `memory/quest_log.py` | Dynamic quest log — tracks progress (1–10), completion, rewards, mandatory vs optional |
+| `memory/world_state.py` | World event log — visited locations, collected items, key decisions fed back into every prompt |
+| `memory/summarizer.py` | Compresses DM responses before storing to long-term memory |
+| `memory/embeddings.py` | Embedding backend — `sentence-transformers` (default) or Gemini `text-embedding-004` |
+| `llm/story_engine.py` | Gemini API wrapper with error recovery |
+| `llm/prompt_builder.py` | Assembles the full DM prompt from all memory layers |
+| `memory/npc_and_quest_parser.py` | Extracts structured JSON (NPCs, quests, world events) from LLM output |
 
 ---
 
-## 📦 Requirements
+## Requirements
 
 - Python 3.10+
-- MongoDB (local or remote)
-- Dependencies:
+- MongoDB (local or Atlas)
 
 ```bash
-pip install google-generativeai sentence-transformers faiss-cpu pymongo numpy tqdm
+pip install -r requirements.txt
 ```
 
 ---
 
-## 🔑 Environment Variables
+## Environment Variables
+
+Create a `.env` file in the project root:
+
+```
+GEMINI_API_KEY=your_gemini_api_key
+MONGODB_PASSWORD=your_mongodb_password
+EMBEDDING_BACKEND=sentence   # or "gemini"
+```
 
 | Variable | Description |
-|-----------|-------------|
-| `MONGO_URI` | MongoDB connection string (`mongodb://localhost:27017`) |
-| `EMBEDDING_BACKEND` | `gemini` or `sentence` |
-| `GEMINI_API_KEY` | Required for Gemini backend |
+|---|---|
+| `GEMINI_API_KEY` | Google Gemini API key (required) |
+| `MONGODB_PASSWORD` | MongoDB Atlas password (required) |
+| `EMBEDDING_BACKEND` | `sentence` (default, local) or `gemini` (API-based) |
 
 ---
 
-## 🚀 How to Run
+## Running
+
+### CLI
 
 ```bash
-# 1. Clone repo
-git clone https://github.com/shadye-6/dungeonsNdestiny.ai
-cd dungeonsNdestiny.ai-main
-
-# 2. Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate
-
-# 3. Install dependencies
-pip install -r requirements.txt   # or use commands above
-
-# 4. Start MongoDB (Docker example)
-docker run -d -p 27017:27017 mongo:6.0
-
-# 5. Run
-export MONGO_URI="mongodb://localhost:27017"
-export EMBEDDING_BACKEND="gemini"
 python main.py
 ```
 
----
+### Web UI (Streamlit)
 
-## 🧠 System Flow
-
-1. Player input is received in CLI.
-2. Recent turns are fetched from **WorkingMemory**.
-3. Relevant long-term memories are retrieved from FAISS via semantic search.
-4. `prompt_builder.py` constructs the prompt using both.
-5. LLM generates narrative + JSON (NPCs, quests).
-6. `npc_and_quest_parser.py` extracts structured data.
-7. Summary is generated and stored back into PersistentMemory.
-8. NPC and Quest logs update automatically.
-
----
-
-## 🧩 Features
-
-- Two-tier memory (short-term + long-term)
-- Persistent world and NPC memory via MongoDB
-- Quest tracking and reward logging
-- Modular, interpretable design
-- Supports multiple LLM/embedding backends
-
----
-
-## 📽️ Demo Recording
-```
-Demo Recording: https://drive.google.com/file/d/1cK5EMd80leFlOht1cnNjoOcAEAxI1EdY/view?usp=drive_link
+```bash
+streamlit run web_app/streamlit_app.py
 ```
 
 ---
 
-## 👥 Authors
-Developed by **Team kawAI**  
-Contributors: *[Pragadeesh S K, Dakshin]*
+## Features
+
+- **Two-tier memory**: short-term deque (5 turns) + long-term semantic search (FAISS/RAG, up to 500 turns)
+- **NPC character memory**: each NPC maintains a FAISS-indexed interaction history; re-encounters are contextually aware
+- **Dynamic quest log**: mandatory main-story quests tracked automatically; optional side quests prompt the player for accept/decline
+- **World state tracking**: locations, items, and key decisions logged and fed into every prompt for narrative consistency
+- **Dual interface**: CLI for raw gameplay; Streamlit web UI with sidebar panels for quests, NPC history, world state, and memory stats
+- **Session persistence**: Streamlit chat history survives browser refresh (stored in MongoDB)
+- **Stable across 30+ turns**: summarizer + error recovery ensure the game loop never crashes
+
+---
+
+## Demo
+
+[Demo Recording](https://drive.google.com/file/d/1cK5EMd80leFlOht1cnNjoOcAEAxI1EdY/view?usp=drive_link)
+
+---
+
+## Authors
+
+Developed by **Team kawAI** — Pragadeesh S K, Dakshin

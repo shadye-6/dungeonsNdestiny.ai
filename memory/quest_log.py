@@ -16,6 +16,10 @@ class QuestLog:
         """Return a specific active quest by name."""
         return self.collection.find_one({"quest_name": quest_name, "active": True, "completed": False, "abandoned": False})
 
+    def quest_exists_by_name(self, quest_name) -> bool:
+        """Return True if a quest with this name exists in any state (active, completed, or abandoned)."""
+        return self.collection.find_one({"quest_name": quest_name}) is not None
+
     def add_quest(self, quest_name, summary, reward, mandatory=False):
         """Add a new quest and return the inserted document id."""
         quest_data = {
