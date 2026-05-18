@@ -50,48 +50,79 @@ Player Input
 
 ---
 
-## Requirements
+## Setup Guide
 
-- Python 3.10+
-- MongoDB (local or Atlas)
+### Prerequisites
+
+- Python 3.10 or later
+- Git
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/shadye-6/dungeonsNdestiny.ai.git
+cd dungeonsNdestiny.ai
+```
+
+### 2. Create and activate a virtual environment
+
+```bash
+python -m venv venv
+
+# macOS / Linux
+source venv/bin/activate
+
+# Windows
+venv\Scripts\activate
+```
+
+### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
+> The first run will download the `all-MiniLM-L6-v2` sentence-transformer model (~90 MB). This only happens once and is cached locally.
 
-## Environment Variables
+### 4. Get a Gemini API key
 
-Create a `.env` file in the project root:
+1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
+2. Sign in and click **Create API key**
+3. Copy the key — you'll need it in the next step
+
+### 5. Configure environment variables
+
+Create a file named `.env` in the project root:
 
 ```
-GEMINI_API_KEY=your_gemini_api_key
-MONGODB_PASSWORD=your_mongodb_password
-EMBEDDING_BACKEND=sentence   # or "gemini"
+GEMINI_API_KEY=your_gemini_api_key_here
+MONGODB_PASSWORD=your_mongodb_password_here
+EMBEDDING_BACKEND=sentence
 ```
 
-| Variable | Description |
-|---|---|
-| `GEMINI_API_KEY` | Google Gemini API key (required) |
-| `MONGODB_PASSWORD` | MongoDB Atlas password (required) |
-| `EMBEDDING_BACKEND` | `sentence` (default, local) or `gemini` (API-based) |
+| Variable | Required | Description |
+|---|---|---|
+| `GEMINI_API_KEY` | Yes | Google Gemini API key for LLM generation and (optionally) embeddings |
+| `MONGODB_PASSWORD` | Yes | Password for the shared MongoDB Atlas instance |
+| `EMBEDDING_BACKEND` | No | `sentence` (default, fully local) or `gemini` (uses Gemini embedding API) |
 
----
+> **MongoDB:** The project connects to a shared MongoDB Atlas cluster. The `MONGODB_PASSWORD` for that cluster is provided separately by the team. Alternatively, to use a local MongoDB instance, replace the `MONGO_URI` in `utils/config.py` with `mongodb://localhost:27017`.
 
-## Running
+### 6. Run
 
-### CLI
+**Command-line interface:**
 
 ```bash
 python main.py
 ```
 
-### Web UI (Streamlit)
+**Web UI (Streamlit):**
 
 ```bash
 streamlit run web_app/streamlit_app.py
 ```
+
+Then open `http://localhost:8501` in your browser.
 
 ---
 
