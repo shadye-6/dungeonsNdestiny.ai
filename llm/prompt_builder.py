@@ -69,7 +69,7 @@ Then, a JSON object like this (no extra text outside JSON):
         {{"npc_name": "Elder Mira", "interaction": "spoke to", "context": "Warned the player about the spreading darkness."}}
     ],
     "quests": [
-        {{"quest_name": "Retrieve the Ancient Sword", "progress": "Started", "description": "Player needs to retrieve the ancient sword from the haunted ruins.", "reward": "Legendary Sword", "mandatory": False}}
+        {{"quest_name": "Retrieve the Ancient Sword", "progress": "Started", "description": "Player needs to retrieve the ancient sword from the haunted ruins.", "reward": "Legendary Sword", "mandatory": false}}
     ]
 }}
 

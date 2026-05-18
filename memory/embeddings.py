@@ -1,18 +1,32 @@
 import os
 
-BACKEND = os.getenv("EMBEDDING_BACKEND", "sentence")
+_sentence_model = None
+_gemini_configured = False
 
-if BACKEND == "gemini":
-    import google.generativeai as genai
-    from utils.config import GEMINI_API_KEY
-    genai.configure(api_key=GEMINI_API_KEY)
 
-    def embed_text(text: str) -> list[float]:
-        response = genai.embeddings.create(model="embed-text-3-large", input=text)
-        return response.data[0].embedding
-else:
-    from sentence_transformers import SentenceTransformer
-    model = SentenceTransformer("all-MiniLM-L6-v2")
+def embed_text(text: str) -> list[float]:
+    backend = os.getenv("EMBEDDING_BACKEND", "sentence")
 
-    def embed_text(text: str) -> list[float]:
-        return model.encode(text).tolist()
+    if backend == "gemini":
+        import google.generativeai as genai
+        from utils.config import GEMINI_API_KEY
+
+        global _gemini_configured
+        if not _gemini_configured:
+            genai.configure(api_key=GEMINI_API_KEY)
+            _gemini_configured = True
+
+        result = genai.embed_content(
+            model="models/text-embedding-004",
+            content=text,
+            task_type="retrieval_document"
+        )
+        return result["embedding"]
+
+    else:
+        from sentence_transformers import SentenceTransformer
+
+        global _sentence_model
+        if _sentence_model is None:
+            _sentence_model = SentenceTransformer("all-MiniLM-L6-v2")
+        return _sentence_model.encode(text).tolist()
