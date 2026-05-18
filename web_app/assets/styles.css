@@ -1,0 +1,61 @@
+/* Dungeons N Destiny — UI theme */
+
+/* Slightly warm background */
+[data-testid="stAppViewContainer"] {
+    background-color: #0f0e17;
+    color: #fffffe;
+}
+
+/* Main heading */
+h1 {
+    font-family: 'Georgia', serif;
+    color: #c0a060 !important;
+    letter-spacing: 1px;
+}
+
+h3 {
+    color: #a89060 !important;
+    font-family: 'Georgia', serif;
+}
+
+/* DM narrative text in chat */
+[data-testid="stMarkdownContainer"] p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* Metric labels */
+[data-testid="stMetricLabel"] {
+    font-size: 0.8rem;
+    color: #8a7a5a !important;
+}
+
+/* Text input */
+[data-testid="stTextInput"] input {
+    background-color: #1a1a2e;
+    color: #e8d5b7;
+    border: 1px solid #3a3050;
+}
+
+/* Buttons */
+[data-testid="stFormSubmitButton"] button {
+    background-color: #4a3020;
+    color: #e8d5b7;
+    border: 1px solid #c0a060;
+}
+
+[data-testid="stFormSubmitButton"] button:hover {
+    background-color: #6a4030;
+    border-color: #e0c080;
+}
+
+/* Progress bars (quest progress) */
+[data-testid="stProgress"] > div > div {
+    background-color: #c0a060 !important;
+}
+
+/* Sidebar area */
+[data-testid="column"]:last-child {
+    border-left: 1px solid #2a2040;
+    padding-left: 1rem;
+}
