@@ -12,6 +12,7 @@ from memory.persistent import PersistentMemory
 from memory.working import WorkingMemory
 from memory.character_memory import CharacterMemory
 from memory.quest_log import QuestLog
+from memory.world_state import WorldState
 from memory.npc_and_quest_parser import parse_llm_output
 from memory.summarizer import summarize_for_memory
 from memory.embeddings import embed_text
@@ -53,6 +54,11 @@ def get_character_mem():
 @st.cache_resource
 def get_quest_log():
     return QuestLog()
+
+
+@st.cache_resource
+def get_world_state():
+    return WorldState()
 
 
 @st.cache_resource
@@ -154,6 +160,7 @@ if submitted and player_input.strip():
     pm = get_persistent_mem()
     cm = get_character_mem()
     ql = get_quest_log()
+    ws = get_world_state()
 
     npc_name = None
     if "talk to" in player_input.lower():
@@ -161,6 +168,7 @@ if submitted and player_input.strip():
 
     working_context = st.session_state.working_mem.get_context()
     retrieved_context = "\n".join(pm.retrieve(player_input, top_k=5))
+    world_state_context = ws.get_context()
 
     if npc_name:
         npc_history = "\n".join(cm.get_memory(npc_name, query=player_input, top_k=5))
@@ -181,7 +189,8 @@ if submitted and player_input.strip():
         working_context + (f"\nActive Quests:\n{quest_context}" if quest_context else ""),
         retrieved_context,
         player_input,
-        reward_context=reward_context
+        reward_context=reward_context,
+        world_state_context=world_state_context
     )
 
     response = generate_response(prompt)
@@ -190,6 +199,10 @@ if submitted and player_input.strip():
     st.session_state.turn += 1
     st.session_state.history.append(f"**You (Turn {st.session_state.turn}):** {player_input}")
     st.session_state.history.append(f"**DM:** {dm_text}")
+
+    # Log world events from this turn
+    for event in world_events:
+        ws.log_event(event["type"], event.get("name", ""), event["detail"])
 
     # Persist memory
     summary = summarize_for_memory(dm_text)
@@ -272,10 +285,25 @@ with col_sidebar:
         st.markdown("*No NPC interactions yet.*")
 
     st.markdown("---")
+    st.markdown("### 🌍 World State")
+    ws = get_world_state()
+    locations = ws.get_visited_locations()
+    items = ws.get_collected_items()
+    if locations:
+        st.markdown("**Locations visited:**")
+        st.caption(", ".join(locations[-6:]))
+    if items:
+        st.markdown("**Items found:**")
+        st.caption(", ".join(items))
+    if not locations and not items:
+        st.markdown("*No world events recorded yet.*")
+
+    st.markdown("---")
     st.markdown("### 🧠 Memory Stats")
     pm = get_persistent_mem()
     st.metric("Turn", st.session_state.turn)
     st.metric("Memories stored", pm.count())
+    st.metric("World events", ws.count())
     st.metric("Short-term window", len(st.session_state.working_mem))
 
     st.markdown("---")

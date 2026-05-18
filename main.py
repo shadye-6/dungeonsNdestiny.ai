@@ -3,6 +3,7 @@ from memory.persistent import PersistentMemory
 from memory.working import WorkingMemory
 from memory.character_memory import CharacterMemory
 from memory.quest_log import QuestLog
+from memory.world_state import WorldState
 from memory.npc_and_quest_parser import parse_llm_output
 from memory.summarizer import summarize_for_memory
 from memory.embeddings import embed_text
@@ -14,6 +15,7 @@ working_mem = WorkingMemory(limit=5)
 working_mem.load_from(persistent_mem.get_recent_memories(5))
 character_mem = CharacterMemory()
 quest_log = QuestLog()
+world_state = WorldState()
 
 print("🛡️ AI Dungeon Master is ready! Type 'start' to begin or 'exit' to quit.\n")
 print("📜 Rules:")
@@ -29,13 +31,13 @@ while True:
         print("Exiting AI Dungeon Master...")
         break
 
-    # Detect explicit NPC interaction for targeted memory retrieval
     npc_name = None
     if "talk to" in player_input.lower():
         npc_name = player_input.split("talk to")[-1].strip().title()
 
     working_context = working_mem.get_context()
     retrieved_context = "\n".join(persistent_mem.retrieve(player_input, top_k=5))
+    world_state_context = world_state.get_context()
 
     if npc_name:
         npc_history = "\n".join(character_mem.get_memory(npc_name, query=player_input, top_k=5))
@@ -56,18 +58,22 @@ while True:
         working_context + (f"\nActive Quests:\n{quest_context}" if quest_context else ""),
         retrieved_context,
         player_input,
-        reward_context=reward_context
+        reward_context=reward_context,
+        world_state_context=world_state_context
     )
 
     response = generate_response(prompt)
     dm_text, npcs, quests, world_events = parse_llm_output(response)
     display_output(dm_text)
 
-    # Persist this turn to long-term and short-term memory
     summary = summarize_for_memory(dm_text)
     summary_emb = embed_text(summary)
     persistent_mem.add_memory(summary, summary_emb)
     working_mem.push(summary)
+
+    # Log world events
+    for event in world_events:
+        world_state.log_event(event["type"], event.get("name", ""), event["detail"])
 
     # Update NPC character memory
     for npc in npcs:
