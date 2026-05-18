@@ -1,8 +1,14 @@
-# Ignore Python cache and virtual environments
+# Python
 __pycache__/
+*.pyc
 venv/
 .env
-*.pyc
 
-# Ignore Streamlit logs
+# OS
+.DS_Store
+
+# Streamlit
 .streamlit/
+
+# Documents
+*.pdf
