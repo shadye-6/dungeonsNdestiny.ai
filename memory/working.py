@@ -1,12 +1,21 @@
-# memory/working_memory.py
-# from collections import deque
+from collections import deque
 
-# class WorkingMemory:
-#     def __init__(self, limit=5):
-#         self.memory = deque(maxlen=limit)
 
-#     def add_turn(self, speaker, text):
-#         self.memory.append({"speaker": speaker, "text": text})
+class WorkingMemory:
+    """Short-term memory buffer — holds the last N turn summaries for immediate context."""
 
-#     def get_context(self):
-#         return "\n".join([f"{m['speaker']}: {m['text']}" for m in self.memory])
+    def __init__(self, limit: int = 5):
+        self._buffer = deque(maxlen=limit)
+
+    def push(self, summary: str):
+        self._buffer.append(summary)
+
+    def get_context(self) -> str:
+        return "\n".join(self._buffer)
+
+    def load_from(self, entries: list):
+        for entry in entries:
+            self._buffer.append(entry)
+
+    def __len__(self) -> int:
+        return len(self._buffer)
