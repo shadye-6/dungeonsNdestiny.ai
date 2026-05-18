@@ -1,18 +1,19 @@
 from llm.story_engine import generate_response
 
+
 def summarize_for_memory(text: str) -> str:
-    """
-    Summarizes a DM response into a concise form suitable for persistent memory.
-    """
-    prompt = f"""
-You are an AI assistant tasked with summarizing game events.
-Summarize the following text into 1-2 sentences, preserving key characters, events, and locations:
+    """Compress a DM response into 1-2 sentences for long-term memory storage."""
+    prompt = f"""You are an assistant summarizing events in a tabletop RPG.
+Summarize the following text in 1-2 sentences, preserving key characters, locations, and events.
 
 Text:
 {text}
 
-Summary:
-"""
-    summary = generate_response(prompt)
-    summary = summary.strip().replace("\n", " ")
-    return summary
+Summary:"""
+
+    try:
+        summary = generate_response(prompt)
+        return summary.strip().replace("\n", " ")
+    except Exception:
+        # Fallback: truncate the original text rather than crashing
+        return text[:200].strip()
